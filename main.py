@@ -1,4 +1,6 @@
 import random
+from multiprocessing import Pool
+import time
 
 min_distance = 5
 max_distance = 50
@@ -112,6 +114,10 @@ class Ant:
         return self.get_distance()
 
 
+def current_milli_time():
+    return round(time.time() * 1000)
+
+
 def calculate_delta_t(ants, i, j):
     result = 0
     for ant in ants:
@@ -134,6 +140,10 @@ def get_best_route_data(ants):
             best_length = ant.get_distance()
 
     return best_route, best_length
+
+
+def find_path_async(ant, t):
+    ant.find_path_aco(t)
 
 
 def main():
@@ -191,9 +201,14 @@ def main():
     best_length = None
     best_route = None
     for t in range(colony_life_span):
+        start = current_milli_time()
         # 7. For each ant
+        pool = Pool(num_of_ants)
         for inx, ant in enumerate(ants):
-            ant.find_path_aco(t)
+            pool.apply_async(find_path_async, (ant, t))
+
+        pool.close()
+        pool.join()
 
         # update best route and length
         current_best_route, current_best_length = get_best_route_data(ants)
@@ -214,7 +229,10 @@ def main():
                         pheromones[t + 1][i][j] = (1 - p) * pheromones[t][i][j] + delta_t
 
         if (t + 1) % 20 == 0:
-            print(f"Finished cycle {t + 1}. Found best route is {best_length} long. Current best routes is {current_best_length}. Path: {best_route}")
+            print(
+                f"Finished cycle {t + 1}. Found best route is {best_length} long. Current best routes is {current_best_length}. Path: {best_route}")
+
+        print(f"Cycle took {current_milli_time() - start}")
 
     print(f"Done. Found best route is {best_length} long. Path: {best_route}")
 

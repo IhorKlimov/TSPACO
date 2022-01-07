@@ -3,7 +3,7 @@ import random
 min_distance = 5
 max_distance = 50
 num_of_vertices = 150
-colony_life_span = 20
+colony_life_span = 1000
 num_of_ants = 35
 a = 2
 b = 3
@@ -155,8 +155,6 @@ def main():
                 distances[r][c] = d
                 distances[c][r] = d
 
-    # plt.plot(list(map(lambda p: p.x, points)), list(map(lambda p: p.y, points)))
-    # plt.show()
     course = Ant(distances, [], random.randint(0, num_of_vertices - 1))
     course.find_path()
     print(f"Random found path is {course.get_distance()} long")
@@ -196,7 +194,6 @@ def main():
         # 7. For each ant
         for inx, ant in enumerate(ants):
             ant.find_path_aco(t)
-            print(f"Found ant path is {ant.get_distance()} for ant {inx}")
 
         # update best route and length
         current_best_route, current_best_length = get_best_route_data(ants)
@@ -204,7 +201,7 @@ def main():
             best_route = current_best_route
             best_length = current_best_length
         elif current_best_length < best_length:
-            print("Updating best route!")
+            print(f"Updating best route! Length = {current_best_length}")
             best_route = current_best_route
             best_length = current_best_length
 
@@ -216,7 +213,10 @@ def main():
                         delta_t = calculate_delta_t(ants, i, j)
                         pheromones[t + 1][i][j] = (1 - p) * pheromones[t][i][j] + delta_t
 
-    print(f"Done. found best route is {best_length} long. Path: {best_route}")
+        if (t + 1) % 20 == 0:
+            print(f"Finished cycle {t + 1}. Found best route is {best_length} long. Current best routes is {current_best_length}. Path: {best_route}")
+
+    print(f"Done. Found best route is {best_length} long. Path: {best_route}")
 
 
 if __name__ == '__main__':
